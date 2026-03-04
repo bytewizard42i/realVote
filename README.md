@@ -2,6 +2,8 @@
 
 A minimal Hello World smart contract for the Midnight blockchain. Deploy to Preprod and store/read messages on-chain.
 
+This project is built on the Midnight Network.
+
 ## Prerequisites
 
 - **Node.js v22+** (`nvm install 22`)
