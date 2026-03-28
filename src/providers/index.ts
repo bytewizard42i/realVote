@@ -1,5 +1,5 @@
 /**
- * RealVotez Provider Factory
+ * realVote Provider Factory
  *
  * Returns the correct provider bundle based on APP_MODE.
  * Import this from anywhere in the app to get the right providers.
@@ -12,12 +12,12 @@
  */
 
 import { APP_MODE } from '../config.js';
-import type { IRealVotezProviders } from './types.js';
+import type { IRealVoteProviders } from './types.js';
 
 import { DemoLandAuthProvider, DemoLandVotingProvider, DemoLandStateProvider } from './demoLand/index.js';
 import { RealDealAuthProvider, RealDealVotingProvider, RealDealStateProvider } from './realDeal/index.js';
 
-export function createRealVotezProviders(): IRealVotezProviders {
+export function createRealVoteProviders(): IRealVoteProviders {
   if (APP_MODE === 'demoLand') {
     const auth = new DemoLandAuthProvider();
     const voting = new DemoLandVotingProvider();
@@ -32,5 +32,5 @@ export function createRealVotezProviders(): IRealVotezProviders {
   return { auth, voting, state, mode: 'realDeal' };
 }
 
-export type { IRealVotezProviders, IAuthProvider, IVotingProvider, IStateProvider } from './types.js';
+export type { IRealVoteProviders, IAuthProvider, IVotingProvider, IStateProvider } from './types.js';
 export type { VoteChoice, Phase, Proposal, ContractState, VoteResults, VoterIdentity } from './types.js';

@@ -1,15 +1,15 @@
-# RealVotez Architecture — DIDzMonolith Ecosystem Integration
+# realVote Architecture — DIDzMonolith Ecosystem Integration
 
-**RealVotez — Private Voting System on Midnight**
+**realVote — Private Voting System on Midnight**
 **Last Updated**: March 2026
 
 ---
 
 ## Overview
 
-RealVotez is not a standalone voting tool. It is the **governance and decision-making engine** for the entire DIDzMonolith ecosystem — from municipal elections to DAO proposals to legal case management decisions.
+realVote is not a standalone voting tool. It is the **governance and decision-making engine** for the entire DIDzMonolith ecosystem — from municipal elections to DAO proposals to legal case management decisions.
 
-What makes RealVotez different from every other blockchain voting system:
+What makes realVote different from every other blockchain voting system:
 
 1. **Identity without exposure** — voters prove eligibility via DIDz/KYCz ZK proofs, never revealing who they are
 2. **Jurisdiction-aware** — GeoZ integration ensures voters are in the correct district, state, or country
@@ -22,7 +22,7 @@ What makes RealVotez different from every other blockchain voting system:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      RealVotez — Private Voting System                   │
+│                      realVote — Private Voting System                   │
 │                                                                          │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────┐  ┌───────────────┐  │
 │  │  voting.      │  │  eligibility. │  │ results. │  │ delegation.   │  │
@@ -69,7 +69,7 @@ Current Flow:
   Voter → generates secret → derives commitment → shares hex with creator → creator registers
 
 DIDz Flow:
-  Voter → presents DID credential → RealVotez verifies credential via sealed ledger call to DIDz
+  Voter → presents DID credential → realVote verifies credential via sealed ledger call to DIDz
        → auto-derives commitment from DID public key → registers in MerkleTree
 ```
 
@@ -189,9 +189,9 @@ export circuit voteByProxy(
 
 ### 5. AutoDiscovery.legal — Legal Governance Voting
 
-**Current**: RealVotez is generic — no domain-specific voting flows.
+**Current**: realVote is generic — no domain-specific voting flows.
 
-**With ADL**: RealVotez becomes the decision-making engine for legal proceedings:
+**With ADL**: realVote becomes the decision-making engine for legal proceedings:
 
 | Legal Vote Type | Who Votes | What's Decided |
 |----------------|-----------|----------------|
@@ -325,7 +325,7 @@ results-registry.compact   — Immutable results + audit trail
 
 ## Part of the DIDz Ecosystem
 
-| Product | How RealVotez Uses It |
+| Product | How realVote Uses It |
 |---------|----------------|
 | **[DIDz.io](https://github.com/bytewizard42i/didz-dapp-system)** | Voter identity — DID-based registration replaces manual commitment sharing |
 | **[KYCz](https://github.com/bytewizard42i/KYCz_us_app)** | Eligibility proofs — age, citizenship, residency without revealing PII |

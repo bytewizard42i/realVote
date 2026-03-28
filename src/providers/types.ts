@@ -1,5 +1,5 @@
 /**
- * RealVotez Provider Interfaces
+ * realVote Provider Interfaces
  *
  * Abstract contracts for the voting system. Both demoLand (mock) and
  * realDeal (Midnight) providers implement these same interfaces.
@@ -176,7 +176,7 @@ export interface IDelegationProvider {
 
 // ─── Combined Provider ─────────────────────────────────────────────────────────
 
-export interface IRealVotezProviders {
+export interface IRealVoteProviders {
   auth: IAuthProvider;
   voting: IVotingProvider;
   state: IStateProvider;

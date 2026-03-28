@@ -1,4 +1,4 @@
-# RealVotez — Private Voting System on Midnight
+# realVote — Private Voting System on Midnight
 
 > **The governance and decision-making engine for the DIDzMonolith ecosystem.**
 
@@ -11,9 +11,9 @@ A zero-knowledge private voting system for the Midnight blockchain. Voters prove
 
 ---
 
-## What Makes RealVotez Different
+## What Makes realVote Different
 
-Every blockchain voting system claims "private voting." RealVotez is the only one that integrates:
+Every blockchain voting system claims "private voting." realVote is the only one that integrates:
 
 | Capability | How | Powered By |
 |-----------|-----|------------|
@@ -57,10 +57,10 @@ npm install
 npm run cli
 
 # — OR — Run in realDeal (real Midnight Preprod)
-REALVOTEZ_MODE=realDeal npm run compile
-REALVOTEZ_MODE=realDeal npm run proof-server:start
-REALVOTEZ_MODE=realDeal npm run deploy
-REALVOTEZ_MODE=realDeal npm run cli
+REALVOTE_MODE=realDeal npm run compile
+REALVOTE_MODE=realDeal npm run proof-server:start
+REALVOTE_MODE=realDeal npm run deploy
+REALVOTE_MODE=realDeal npm run cli
 ```
 
 **DemoLand mode** gives you full functionality with simulated blockchain — perfect for development and demos.
@@ -224,9 +224,9 @@ Targets **Preprod** testnet:
 
 ## Part of the DIDz Ecosystem
 
-RealVotez is the governance layer for [EnterpriseZK Labs](https://enterprisezk.com):
+realVote is the governance layer for [EnterpriseZK Labs](https://enterprisezk.com):
 
-| Product | How It Uses RealVotez |
+| Product | How It Uses realVote |
 |---------|----------------|
 | **[DIDz.io](https://github.com/bytewizard42i/didz-dapp-system)** | DID-based voter registration |
 | **[KYCz](https://github.com/bytewizard42i/KYCz_us_app)** | Voter eligibility proofs (age, citizenship, residency) |
