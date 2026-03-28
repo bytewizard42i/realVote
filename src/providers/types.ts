@@ -1,5 +1,5 @@
 /**
- * PVS Provider Interfaces
+ * RealVotez Provider Interfaces
  *
  * Abstract contracts for the voting system. Both demoLand (mock) and
  * realDeal (Midnight) providers implement these same interfaces.
@@ -176,7 +176,7 @@ export interface IDelegationProvider {
 
 // ─── Combined Provider ─────────────────────────────────────────────────────────
 
-export interface IPVSProviders {
+export interface IRealVotezProviders {
   auth: IAuthProvider;
   voting: IVotingProvider;
   state: IStateProvider;

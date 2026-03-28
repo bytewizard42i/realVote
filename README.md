@@ -1,4 +1,4 @@
-# PVS — Private Voting System on Midnight
+# RealVotez — Private Voting System on Midnight
 
 > **The governance and decision-making engine for the DIDzMonolith ecosystem.**
 
@@ -11,9 +11,9 @@ A zero-knowledge private voting system for the Midnight blockchain. Voters prove
 
 ---
 
-## What Makes PVS Different
+## What Makes RealVotez Different
 
-Every blockchain voting system claims "private voting." PVS is the only one that integrates:
+Every blockchain voting system claims "private voting." RealVotez is the only one that integrates:
 
 | Capability | How | Powered By |
 |-----------|-----|------------|
@@ -57,10 +57,10 @@ npm install
 npm run cli
 
 # — OR — Run in realDeal (real Midnight Preprod)
-PVS_MODE=realDeal npm run compile
-PVS_MODE=realDeal npm run proof-server:start
-PVS_MODE=realDeal npm run deploy
-PVS_MODE=realDeal npm run cli
+REALVOTEZ_MODE=realDeal npm run compile
+REALVOTEZ_MODE=realDeal npm run proof-server:start
+REALVOTEZ_MODE=realDeal npm run deploy
+REALVOTEZ_MODE=realDeal npm run cli
 ```
 
 **DemoLand mode** gives you full functionality with simulated blockchain — perfect for development and demos.
@@ -224,9 +224,9 @@ Targets **Preprod** testnet:
 
 ## Part of the DIDz Ecosystem
 
-PVS is the governance layer for [EnterpriseZK Labs](https://enterprisezk.com):
+RealVotez is the governance layer for [EnterpriseZK Labs](https://enterprisezk.com):
 
-| Product | How It Uses PVS |
+| Product | How It Uses RealVotez |
 |---------|----------------|
 | **[DIDz.io](https://github.com/bytewizard42i/didz-dapp-system)** | DID-based voter registration |
 | **[KYCz](https://github.com/bytewizard42i/KYCz_us_app)** | Voter eligibility proofs (age, citizenship, residency) |

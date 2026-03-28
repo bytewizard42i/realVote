@@ -1,8 +1,8 @@
 /**
- * PVS Configuration — Mode Switch
+ * RealVotez Configuration — Mode Switch
  *
  * Controls whether the app runs in demoLand (mock) or realDeal (Midnight) mode.
- * Set via PVS_MODE environment variable or defaults to 'demoLand'.
+ * Set via REALVOTEZ_MODE environment variable or defaults to 'demoLand'.
  *
  * demoLand: Full functionality with simulated blockchain — no wallet, no Docker, no tokens needed.
  * realDeal: Real Midnight Preprod integration — requires wallet, proof server, tNight tokens.
@@ -10,7 +10,7 @@
 
 export type AppMode = 'demoLand' | 'realDeal';
 
-export const APP_MODE: AppMode = (process.env.PVS_MODE as AppMode) || 'demoLand';
+export const APP_MODE: AppMode = (process.env.REALVOTEZ_MODE as AppMode) || 'demoLand';
 
 export const isDemoLand = APP_MODE === 'demoLand';
 export const isRealDeal = APP_MODE === 'realDeal';
@@ -24,4 +24,4 @@ export const NETWORK_CONFIG = {
   faucet: 'https://faucet.preprod.midnight.network/',
 };
 
-console.log(`\n🔧 PVS running in ${APP_MODE === 'demoLand' ? '🏰 demoLand (mock)' : '⛓️ realDeal (Midnight Preprod)'} mode\n`);
+console.log(`\n🔧 RealVotez running in ${APP_MODE === 'demoLand' ? '🏰 demoLand (mock)' : '⛓️ realDeal (Midnight Preprod)'} mode\n`);
