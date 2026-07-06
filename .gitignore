@@ -34,3 +34,4 @@ deployment.json
 # OS
 .DS_Store
 Thumbs.db
+build/
