@@ -246,3 +246,14 @@ MIT
 ---
 
 *EnterpriseZK Labs LLC — Built on Midnight. Powered by Cardano. Protected by zero-knowledge cryptography.*
+
+---
+
+## DIDz Ecosystem
+
+This project is part of the DIDz ecosystem — a suite of privacy-preserving
+identity, credential, and application tools built on Midnight Network.
+
+![DIDz Ecosystem Map](docs/DIDz-ecosystem-map.png)
+
+See the full ecosystem map above, or visit [didz.io](https://didz.io) for details.
