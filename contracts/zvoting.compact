@@ -1,0 +1,324 @@
+pragma language_version >= 0.16 && <= 0.23;
+
+import CompactStandardLibrary;
+
+// ============================================================================
+// realVote — zVoting v2: Proof-of-Life-Gated Voting Stack (Phase R4)
+// ============================================================================
+//
+// THE VOTING STACK (Constitution Article II + III + IV)
+//   HumanDIDz → ProofOfLife → Citizenship → VotingEligibility
+//            → ElectionSpecificVotingGrant → OneTimeVoteCastReceipt
+//
+//   This contract implements the ON-CHAIN portion of that stack. The off-chain
+//   credential checks (POL freshness, citizenship, eligibility) are proven
+//   via witnesses inside the circuit. The chain enforces:
+//     1. One vote per election per person (nullifier)
+//     2. Vote was cast during the open phase
+//     3. Public tally (yes/no) — never who voted
+//     4. Election lifecycle (create → open → close → results)
+//
+// PRIVACY MODEL
+//   The voter's secret key never appears on-chain. A per-election nullifier
+//   H("didz:zvote:nullf:", voter_secret, election_id) prevents double voting
+//   while being unlinkable across elections (Constitution Article VI).
+//   The tally is public; individual votes are not.
+//
+// RELATIONSHIP TO MIDNIGHT-MODULES
+//   In production, this contract imports pol_credential and human_credentials
+//   from midnight-modules and calls assert_my_life_fresh_once + assert_voting_eligibility
+//   inside the vote circuit. For standalone compilation, those checks are
+//   represented as witnesses here. The real integration happens at the
+//   application layer via the Midnight SDK.
+//
+// ELECTION LIFECYCLE
+//   create_election  <- admin (defines election_id, opens registration)
+//   open_voting      <- admin (closes registration, opens voting)
+//   vote             <- voter (casts yes/no, spends nullifier)
+//   close_election   <- admin (closes voting, finalizes results)
+//   get_results      <- anyone (reads final tally)
+
+// ---------------------------------------------------------------------------
+// ELECTION PHASES
+// ---------------------------------------------------------------------------
+
+export enum ElectionPhase {
+  SETUP,     // 0 — election created, registering voters
+  OPEN,      // 1 — voting is open
+  CLOSED     // 2 — voting is closed, results are final
+}
+
+// ---------------------------------------------------------------------------
+// DATA STRUCTURES
+// ---------------------------------------------------------------------------
+
+struct Election {
+  electionId: Bytes<32>;          // unique election identifier (public)
+  jurisdictionHash: Bytes<32>;    // jurisdiction for this election (public)
+  createdAt: Uint<64>;            // epoch when created
+  phase: Uint<8>;                 // ElectionPhase cast as Uint<8>
+  totalVotes: Uint<64>;           // total votes cast
+  yesVotes: Uint<64>;             // yes tally
+  noVotes: Uint<64>;              // no tally
+}
+
+struct ElectionSlotInput {
+  separator: Bytes<32>;
+  electionId: Bytes<32>;
+}
+
+// ---------------------------------------------------------------------------
+// LEDGER STATE
+// ---------------------------------------------------------------------------
+
+// Election registry: map key = H(electionId)
+export ledger elections: Map<Bytes<32>, Election>;
+
+// Per-election nullifier sets: prevents double voting.
+// Map key = H(electionId, nullifier) — one set per election for efficiency.
+export ledger spent_nullifiers: Set<Bytes<32>>;
+
+// Admin (one-shot claim pattern)
+export ledger election_admin: Bytes<32>;
+export ledger election_admin_claimed: Boolean;
+
+// Shared epoch clock
+export ledger epoch: Counter;
+
+// ---------------------------------------------------------------------------
+// WITNESSES
+// ---------------------------------------------------------------------------
+
+// Voter's secret key — never revealed on-chain.
+witness voter_secret_key(): Bytes<32>;
+
+// Admin's secret key
+witness admin_secret_key(): Bytes<32>;
+
+// Off-chain credential proofs (witnesses represent ZK proof results):
+//   pol_valid: the voter has a fresh proof-of-life within the required window
+//   citizenship_valid: the voter is a citizen of the election's jurisdiction
+//   eligibility_valid: the voter has a non-revoked, non-expired VotingEligibility credential
+//   election_grant_valid: the voter has an election-specific voting grant
+//
+// In production, these are ZK proofs verified inside the circuit. Here they
+// are witnesses — the prover asserts them, and the chain trusts the ZK proof
+// system to enforce them. The nullifier provides the on-chain anti-replay.
+witness pol_valid(): Boolean;
+witness citizenship_valid(): Boolean;
+witness eligibility_valid(): Boolean;
+witness election_grant_valid(): Boolean;
+
+// ---------------------------------------------------------------------------
+// KEY DERIVATION
+// ---------------------------------------------------------------------------
+
+export circuit derive_public_key(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "midnight:mm:pk:"),
+    sk
+  ]);
+}
+
+circuit caller_public_key(): Bytes<32> {
+  return derive_public_key(admin_secret_key());
+}
+
+// Per-election nullifier: H("didz:zvote:nullf:", voter_secret, election_id)
+// Same voter + same election = SAME nullifier (blocks double vote)
+// Same voter + different election = DIFFERENT nullifier (unlinkable)
+export circuit derive_election_nullifier(
+  voterSecret: Bytes<32>,
+  electionId: Bytes<32>
+): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "didz:zvote:nullf:"),
+    voterSecret,
+    electionId
+  ]);
+}
+
+// Compute the slot key for an election
+circuit compute_election_slot(electionId: Bytes<32>): Bytes<32> {
+  return persistentHash<ElectionSlotInput>(ElectionSlotInput {
+    separator: pad(32, "didz:zvote:slot:v1"),
+    electionId: electionId
+  });
+}
+
+// Compute the composite nullifier key for the spent_nullifiers set.
+// This includes the electionId so nullifiers from different elections
+// don't collide in the same set.
+circuit compute_nullifier_set_key(
+  electionId: Bytes<32>,
+  nullifier: Bytes<32>
+): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "didz:zvote:nset:"),
+    electionId,
+    nullifier
+  ]);
+}
+
+// ---------------------------------------------------------------------------
+// ADMIN
+// ---------------------------------------------------------------------------
+
+export circuit claim_election_admin(): [] {
+  assert(!election_admin_claimed, "Election admin already claimed");
+  election_admin = disclose(caller_public_key());
+  election_admin_claimed = true;
+}
+
+// Create a new election. Admin defines the election ID and jurisdiction.
+export circuit create_election(
+  electionId: Bytes<32>,
+  jurisdictionHash: Bytes<32>
+): [] {
+  assert(disclose(caller_public_key() == election_admin), "Not the election admin");
+
+  const slotKey = disclose(compute_election_slot(disclose(electionId)));
+  assert(!elections.member(slotKey), "Election already exists with this ID");
+
+  const election = Election {
+    electionId: disclose(electionId),
+    jurisdictionHash: disclose(jurisdictionHash),
+    createdAt: epoch.read(),
+    phase: 0,  // SETUP
+    totalVotes: 0,
+    yesVotes: 0,
+    noVotes: 0
+  };
+
+  elections.insert(slotKey, disclose(election));
+}
+
+// Open voting for an election. Moves phase from SETUP → OPEN.
+export circuit open_voting(electionId: Bytes<32>): [] {
+  assert(disclose(caller_public_key() == election_admin), "Not the election admin");
+
+  const slotKey = disclose(compute_election_slot(disclose(electionId)));
+  assert(elections.member(slotKey), "Election not found");
+
+  const election = elections.lookup(slotKey);
+  assert(disclose(election.phase) == (0 as Uint<8>), "Election is not in setup phase");
+
+  const updated = Election {
+    electionId: disclose(election.electionId),
+    jurisdictionHash: disclose(election.jurisdictionHash),
+    createdAt: disclose(election.createdAt),
+    phase: 1,  // OPEN
+    totalVotes: disclose(election.totalVotes),
+    yesVotes: disclose(election.yesVotes),
+    noVotes: disclose(election.noVotes)
+  };
+
+  elections.insert(slotKey, disclose(updated));
+}
+
+// Close voting for an election. Moves phase from OPEN → CLOSED.
+// Results are final and publicly readable.
+export circuit close_election(electionId: Bytes<32>): [] {
+  assert(disclose(caller_public_key() == election_admin), "Not the election admin");
+
+  const slotKey = disclose(compute_election_slot(disclose(electionId)));
+  assert(elections.member(slotKey), "Election not found");
+
+  const election = elections.lookup(slotKey);
+  assert(disclose(election.phase) == (1 as Uint<8>), "Election is not open");
+
+  const updated = Election {
+    electionId: disclose(election.electionId),
+    jurisdictionHash: disclose(election.jurisdictionHash),
+    createdAt: disclose(election.createdAt),
+    phase: 2,  // CLOSED
+    totalVotes: disclose(election.totalVotes),
+    yesVotes: disclose(election.yesVotes),
+    noVotes: disclose(election.noVotes)
+  };
+
+  elections.insert(slotKey, disclose(updated));
+}
+
+// ---------------------------------------------------------------------------
+// VOTING — the core circuit
+// ---------------------------------------------------------------------------
+
+// Cast a vote in an election. The voter proves (via witnesses / ZK proofs):
+//   1. They have a fresh ProofOfLife (pol_valid)
+//   2. They are a citizen of the election's jurisdiction (citizenship_valid)
+//   3. They have a non-expired VotingEligibility credential (eligibility_valid)
+//   4. They have an election-specific voting grant (election_grant_valid)
+//
+// The chain enforces:
+//   - Election is in OPEN phase
+//   - Nullifier not already spent (one vote per person per election)
+//
+// The vote choice (yes/no) is revealed to update the tally, but the voter's
+// identity is never linked to their choice — the nullifier only prevents
+// double voting, it doesn't record WHO voted or HOW.
+export circuit vote(
+  electionId: Bytes<32>,
+  choice: Boolean
+): [] {
+  const pubElectionId = disclose(electionId);
+  const slotKey = disclose(compute_election_slot(pubElectionId));
+
+  // 1. Election must exist and be open
+  assert(elections.member(slotKey), "Election not found");
+  const election = elections.lookup(slotKey);
+  assert(disclose(election.phase) == (1 as Uint<8>), "Voting is not open for this election");
+
+  // 2. Credential checks (witnesses represent ZK proof results)
+  assert(disclose(pol_valid()), "Proof of life is not valid or stale");
+  assert(disclose(citizenship_valid()), "Citizenship credential not valid for this jurisdiction");
+  assert(disclose(eligibility_valid()), "Voting eligibility credential not valid");
+  assert(disclose(election_grant_valid()), "Election-specific voting grant not valid");
+
+  // 3. Spend the per-election nullifier (one vote per person per election)
+  const voterSecret = voter_secret_key();
+  const nullifier = disclose(derive_election_nullifier(voterSecret, pubElectionId));
+  const nullifierSetKey = disclose(compute_nullifier_set_key(pubElectionId, nullifier));
+
+  assert(!spent_nullifiers.member(nullifierSetKey), "Already voted in this election");
+  spent_nullifiers.insert(nullifierSetKey);
+
+  // 4. Update the tally (read-increment-write since we use Uint<64> not Counter)
+  const currentYes = disclose(election.yesVotes);
+  const currentNo = disclose(election.noVotes);
+  const currentTotal = disclose(election.totalVotes);
+
+  const newYes = (disclose(choice)) ? (currentYes + (1 as Uint<64>)) as Uint<64> : currentYes;
+  const newNo = (disclose(choice)) ? currentNo : (currentNo + (1 as Uint<64>)) as Uint<64>;
+  const newTotal = (currentTotal + (1 as Uint<64>)) as Uint<64>;
+
+  const updated = Election {
+    electionId: disclose(election.electionId),
+    jurisdictionHash: disclose(election.jurisdictionHash),
+    createdAt: disclose(election.createdAt),
+    phase: disclose(election.phase),
+    totalVotes: newTotal,
+    yesVotes: newYes,
+    noVotes: newNo
+  };
+
+  elections.insert(slotKey, disclose(updated));
+}
+
+// ---------------------------------------------------------------------------
+// RESULTS — anyone can read the tally
+// ---------------------------------------------------------------------------
+
+export circuit get_results(electionId: Bytes<32>): Election {
+  const slotKey = disclose(compute_election_slot(disclose(electionId)));
+  assert(elections.member(slotKey), "Election not found");
+  return elections.lookup(slotKey);
+}
+
+// ---------------------------------------------------------------------------
+// CLOCK
+// ---------------------------------------------------------------------------
+
+export circuit advance_epoch(): [] {
+  epoch.increment(1);
+}
