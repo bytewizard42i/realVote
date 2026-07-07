@@ -1,20 +1,20 @@
-# realVote Architecture — DIDzMonolith Ecosystem Integration
+# realVote Architecture, DIDzMonolith Ecosystem Integration
 
-**realVote — Private Voting System on Midnight**
+**realVote, Private Voting System on Midnight**
 **Last Updated**: March 2026
 
 ---
 
 ## Overview
 
-realVote is not a standalone voting tool. It is the **governance and decision-making engine** for the entire DIDzMonolith ecosystem — from municipal elections to DAO proposals to legal case management decisions.
+realVote is not a standalone voting tool. It is the **governance and decision-making engine** for the entire DIDzMonolith ecosystem, from municipal elections to DAO proposals to legal case management decisions.
 
 What makes realVote different from every other blockchain voting system:
 
-1. **Identity without exposure** — voters prove eligibility via DIDz/KYCz ZK proofs, never revealing who they are
-2. **Jurisdiction-aware** — GeoZ integration ensures voters are in the correct district, state, or country
-3. **AI-delegable** — AgenticDID allows humans to delegate voting rights to AI agents with cryptographic proof of authority
-4. **Legally admissible** — AutoDiscovery.legal integration enables governance voting within active legal proceedings
+1. **Identity without exposure**, voters prove eligibility via DIDz/KYCz ZK proofs, never revealing who they are
+2. **Jurisdiction-aware**, GeoZ integration ensures voters are in the correct district, state, or country
+3. **AI-delegable**, AgenticDID allows humans to delegate voting rights to AI agents with cryptographic proof of authority
+4. **Legally admissible**, AutoDiscovery.legal integration enables governance voting within active legal proceedings
 
 ---
 
@@ -22,7 +22,7 @@ What makes realVote different from every other blockchain voting system:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      realVote — Private Voting System                   │
+│                      realVote, Private Voting System                   │
 │                                                                          │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────┐  ┌───────────────┐  │
 │  │  voting.      │  │  eligibility. │  │ results. │  │ delegation.   │  │
@@ -58,7 +58,7 @@ What makes realVote different from every other blockchain voting system:
 
 ## Integration Points
 
-### 1. DIDz.io — Voter Identity
+### 1. DIDz.io, Voter Identity
 
 **Current**: Voters generate a raw `voterSecret` from a wallet seed. The creator registers voters by manually sharing commitment hashes out-of-band.
 
@@ -85,13 +85,13 @@ export circuit registerVoterByDID(voterDIDCommitment: Bytes<32>): [] {
 }
 ```
 
-**Value**: No more manual commitment sharing. Any DIDz holder can be registered as a voter. The DID commitment is their permanent identity anchor — reusable across elections.
+**Value**: No more manual commitment sharing. Any DIDz holder can be registered as a voter. The DID commitment is their permanent identity anchor, reusable across elections.
 
 ---
 
-### 2. KYCz — Voter Eligibility
+### 2. KYCz, Voter Eligibility
 
-**Current**: Any registered voter can vote. There's no eligibility verification — if the creator registers you, you're in.
+**Current**: Any registered voter can vote. There's no eligibility verification, if the creator registers you, you're in.
 
 **With KYCz**: Before registration (or before voting), the voter proves eligibility via KYCz ZK assertions:
 
@@ -116,11 +116,11 @@ export circuit registerEligibleVoter(
 }
 ```
 
-**Value**: Mathematically guaranteed voter eligibility without revealing any personal data. A voting booth proves "this person is a citizen over 18 who isn't sanctioned" — without learning their name, birthday, or address.
+**Value**: Mathematically guaranteed voter eligibility without revealing any personal data. A voting booth proves "this person is a citizen over 18 who isn't sanctioned", without learning their name, birthday, or address.
 
 ---
 
-### 3. GeoZ — Jurisdiction-Aware Voting
+### 3. GeoZ, Jurisdiction-Aware Voting
 
 **Current**: No geographic awareness. Any registered voter votes on any proposal.
 
@@ -149,11 +149,11 @@ export circuit voteWithJurisdiction(
 }
 ```
 
-**Value**: A Colorado resident can't vote in a Texas election. A non-EU citizen can't vote on EU governance proposals. All enforced cryptographically — no honor system, no IP-based geolocation.
+**Value**: A Colorado resident can't vote in a Texas election. A non-EU citizen can't vote on EU governance proposals. All enforced cryptographically, no honor system, no IP-based geolocation.
 
 ---
 
-### 4. AgenticDID — AI Agent Proxy Voting
+### 4. AgenticDID, AI Agent Proxy Voting
 
 **Current**: Only human wallet holders can vote.
 
@@ -181,15 +181,15 @@ export circuit voteByProxy(
 }
 ```
 
-**Key constraint**: The **delegator's** nullifier is used, not the agent's. This ensures the human can't vote AND have their agent vote — it's one vote per registered human, whether cast directly or by proxy.
+**Key constraint**: The **delegator's** nullifier is used, not the agent's. This ensures the human can't vote AND have their agent vote, it's one vote per registered human, whether cast directly or by proxy.
 
 **Value**: First voting system where AI agents can participate in governance with cryptographic proof of authority, full audit trail, and no possibility of unauthorized voting.
 
 ---
 
-### 5. AutoDiscovery.legal — Legal Governance Voting
+### 5. AutoDiscovery.legal, Legal Governance Voting
 
-**Current**: realVote is generic — no domain-specific voting flows.
+**Current**: realVote is generic, no domain-specific voting flows.
 
 **With ADL**: realVote becomes the decision-making engine for legal proceedings:
 
@@ -241,29 +241,29 @@ export circuit voteOnCaseMatter(
 ### Current: Single contract (`voting.compact`)
 ```
 voting.compact
-├── registerVoter()        — creator registers by commitment
-├── startVoting()          — set proposal, open voting
-├── vote()                 — anonymous YES/NO via ZK
-└── closeVoting()          — close and finalize
+├── registerVoter()       , creator registers by commitment
+├── startVoting()         , set proposal, open voting
+├── vote()                , anonymous YES/NO via ZK
+└── closeVoting()         , close and finalize
 ```
 
 ### Target: Multi-contract system
 ```
-voting-core.compact        — Base voting mechanics (MerkleTree, nullifiers, tally)
+voting-core.compact       , Base voting mechanics (MerkleTree, nullifiers, tally)
 ├── sealed ledger → eligibility-gate.compact
 ├── sealed ledger → delegation-registry.compact
 └── sealed ledger → results-registry.compact
 
-eligibility-gate.compact   — KYCz + GeoZ + DIDz eligibility checks
+eligibility-gate.compact  , KYCz + GeoZ + DIDz eligibility checks
 ├── sealed ledger → KYCz anchor contract
 ├── sealed ledger → GeoZ proof log
 └── sealed ledger → DIDz credential contract
 
-delegation-registry.compact — AgenticDID proxy voting delegation
+delegation-registry.compact, AgenticDID proxy voting delegation
 ├── sealed ledger → AgenticDID registry
 └── delegation chain verification
 
-results-registry.compact   — Immutable results + audit trail
+results-registry.compact  , Immutable results + audit trail
 ├── Historical results storage
 └── ADL case-binding for legal governance
 ```
@@ -327,15 +327,15 @@ results-registry.compact   — Immutable results + audit trail
 
 | Product | How realVote Uses It |
 |---------|----------------|
-| **[DIDz.io](https://github.com/bytewizard42i/didz-dapp-system)** | Voter identity — DID-based registration replaces manual commitment sharing |
-| **[KYCz](https://github.com/bytewizard42i/KYCz_us_app)** | Eligibility proofs — age, citizenship, residency without revealing PII |
-| **[GeoZ](https://github.com/bytewizard42i/GeoZ_us_app_Midnight-Oracle)** | Jurisdiction enforcement — prove district/state/country membership |
-| **[AgenticDID](https://github.com/bytewizard42i/AgenticDID_io_me)** | Proxy voting — AI agents vote on behalf of humans with delegation proof |
-| **[AutoDiscovery.legal](https://github.com/bytewizard42i/autoDiscovery_legal)** | Legal governance — case-bound voting for settlements, discovery, scheduling |
+| **[DIDz.io](https://github.com/bytewizard42i/didz-dapp-system)** | Voter identity, DID-based registration replaces manual commitment sharing |
+| **[KYCz](https://github.com/bytewizard42i/KYCz_us_app)** | Eligibility proofs, age, citizenship, residency without revealing PII |
+| **[GeoZ](https://github.com/bytewizard42i/GeoZ_us_app_Midnight-Oracle)** | Jurisdiction enforcement, prove district/state/country membership |
+| **[AgenticDID](https://github.com/bytewizard42i/AgenticDID_io_me)** | Proxy voting, AI agents vote on behalf of humans with delegation proof |
+| **[AutoDiscovery.legal](https://github.com/bytewizard42i/autoDiscovery_legal)** | Legal governance, case-bound voting for settlements, discovery, scheduling |
 | **[SentinelAI](https://github.com/bytewizard42i/SentinelAI)** | DAO treasury governance voting with AI advisory tiers |
 | **[HuddleBridge](https://github.com/bytewizard42i/huddlebridge_app_me_us)** | Live event polls with DIDz-verified participants |
 | **[SafeHealthData](https://github.com/bytewizard42i/safeHealthData_me)** | Healthcare board elections, ethics committee votes |
 
 ---
 
-*EnterpriseZK Labs LLC — Built on Midnight. Powered by Cardano. Protected by zero-knowledge cryptography.*
+*EnterpriseZK Labs LLC, Built on Midnight. Powered by Cardano. Protected by zero-knowledge cryptography.*

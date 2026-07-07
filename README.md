@@ -1,11 +1,11 @@
-# realVote — Private Voting System on Midnight
+# realVote, Private Voting System on Midnight
 
 > **The governance and decision-making engine for the DIDzMonolith ecosystem.**
 
-A zero-knowledge private voting system for the Midnight blockchain. Voters prove eligibility via DIDz credentials, cast anonymous votes using ZK proofs, and nullifiers prevent double-voting — all without revealing voter identity.
+A zero-knowledge private voting system for the Midnight blockchain. Voters prove eligibility via DIDz credentials, cast anonymous votes using ZK proofs, and nullifiers prevent double-voting, all without revealing voter identity.
 
 **Website**: [enterprisezk.com](https://enterprisezk.com)
-**Company**: [EnterpriseZK Labs LLC](https://enterprisezk.com) — Pennsylvania, USA
+**Company**: [EnterpriseZK Labs LLC](https://enterprisezk.com), Pennsylvania, USA
 **Blockchain**: [Midnight Network](https://midnight.network) (Cardano ecosystem)
 **Status**: Core contract deployed to Preprod · Ecosystem integration in progress
 
@@ -29,23 +29,23 @@ Every blockchain voting system claims "private voting." realVote is the only one
 
 | Use Case | DIDz | KYCz | GeoZ | AgenticDID | ADL |
 |----------|:----:|:----:|:----:|:----------:|:---:|
-| Municipal election | ✅ | ✅ Age + citizenship | ✅ District | — | — |
-| DAO governance | ✅ | Optional | ✅ Jurisdiction | ✅ AI proxy | — |
-| Corporate shareholder vote | ✅ | ✅ Accredited investor | ✅ Regulatory | ✅ Proxy | — |
-| HOA / condo board | ✅ | — | ✅ Property | — | — |
-| Legal settlement approval | ✅ | — | — | — | ✅ Case-bound |
-| Healthcare board election | ✅ | ✅ Licensed provider | ✅ State license | — | — |
-| Union vote | ✅ | ✅ Employment proof | — | — | — |
-| Live event polls ([HuddleBridge](https://github.com/bytewizard42i/huddlebridge_app_me_us)) | ✅ | — | — | — | — |
-| AI treasury governance ([SentinelAI](https://github.com/bytewizard42i/SentinelAI)) | ✅ | — | — | ✅ | — |
+| Municipal election | ✅ | ✅ Age + citizenship | ✅ District |, |, |
+| DAO governance | ✅ | Optional | ✅ Jurisdiction | ✅ AI proxy |, |
+| Corporate shareholder vote | ✅ | ✅ Accredited investor | ✅ Regulatory | ✅ Proxy |, |
+| HOA / condo board | ✅ |, | ✅ Property |, |, |
+| Legal settlement approval | ✅ |, |, |, | ✅ Case-bound |
+| Healthcare board election | ✅ | ✅ Licensed provider | ✅ State license |, |, |
+| Union vote | ✅ | ✅ Employment proof |, |, |, |
+| Live event polls ([HuddleBridge](https://github.com/bytewizard42i/huddlebridge_app_me_us)) | ✅ |, |, |, |, |
+| AI treasury governance ([SentinelAI](https://github.com/bytewizard42i/SentinelAI)) | ✅ |, |, | ✅ |, |
 
 ---
 
 ## Prerequisites
 
 - **Node.js v22+** (`nvm install 22`)
-- **Docker** (for the proof server — realDeal mode only)
-- **Compact compiler** — See [Midnight docs](https://docs.midnight.network/) for installation
+- **Docker** (for the proof server, realDeal mode only)
+- **Compact compiler**, See [Midnight docs](https://docs.midnight.network/) for installation
 
 ## Quick Start
 
@@ -56,15 +56,15 @@ npm install
 # Run in demoLand (no wallet, no Docker, no tokens needed)
 npm run cli
 
-# — OR — Run in realDeal (real Midnight Preprod)
+#, OR, Run in realDeal (real Midnight Preprod)
 REALVOTE_MODE=realDeal npm run compile
 REALVOTE_MODE=realDeal npm run proof-server:start
 REALVOTE_MODE=realDeal npm run deploy
 REALVOTE_MODE=realDeal npm run cli
 ```
 
-**DemoLand mode** gives you full functionality with simulated blockchain — perfect for development and demos.
-**RealDeal mode** connects to Midnight Preprod — requires wallet, proof server, and tNight tokens.
+**DemoLand mode** gives you full functionality with simulated blockchain, perfect for development and demos.
+**RealDeal mode** connects to Midnight Preprod, requires wallet, proof server, and tNight tokens.
 
 ---
 
@@ -107,7 +107,7 @@ privateVotingSystem/
 
 - **Voter identity** is never revealed on-chain. Votes are linked to a Merkle proof of registration, not a wallet address.
 - **Nullifiers** derived from voter secrets prevent double-voting without revealing who voted.
-- **Commitments** are stored in a `HistoricMerkleTree` — only the tree root is checked during voting.
+- **Commitments** are stored in a `HistoricMerkleTree`, only the tree root is checked during voting.
 - **Vote direction** (YES/NO) is disclosed to the tally, but **cannot be linked** to any voter identity.
 
 ### Key Circuits
@@ -123,16 +123,16 @@ privateVotingSystem/
 
 From Chapter 7 of *How to Code with Midnight*:
 
-- **Pattern 4**: Merkle Tree Role Proofs — voter proves registration without revealing identity
-- **Pattern 8**: Commitment/Nullifier — one vote per person without identity exposure
-- **Pattern 1**: Jurisdiction-Aware Compliance (v2 — GeoZ integration)
-- **Pattern 6**: Spoof Transactions (v2 — prevents voting pattern analysis)
+- **Pattern 4**: Merkle Tree Role Proofs, voter proves registration without revealing identity
+- **Pattern 8**: Commitment/Nullifier, one vote per person without identity exposure
+- **Pattern 1**: Jurisdiction-Aware Compliance (v2, GeoZ integration)
+- **Pattern 6**: Spoof Transactions (v2, prevents voting pattern analysis)
 
 ---
 
 ## Ecosystem Integration (v2 Roadmap)
 
-### Current (v1) — Working
+### Current (v1), Working
 
 The core voting contract is deployed and functional:
 - Manual commitment-based voter registration
@@ -140,25 +140,25 @@ The core voting contract is deployed and functional:
 - Nullifier-based double-vote prevention
 - DemoLand/RealDeal dual-mode provider pattern
 
-### Phase 2 — DIDz Credential-Based Registration
+### Phase 2, DIDz Credential-Based Registration
 
-Replace manual commitment sharing with DIDz credential-based registration. Voters use their existing DIDz identity — no out-of-band commitment exchange needed.
+Replace manual commitment sharing with DIDz credential-based registration. Voters use their existing DIDz identity, no out-of-band commitment exchange needed.
 
-### Phase 3 — KYCz + GeoZ Eligibility Gates
+### Phase 3, KYCz + GeoZ Eligibility Gates
 
 Add eligibility proofs before registration:
 - "Is this voter over 18?" (KYCz age assertion)
 - "Is this voter a citizen?" (KYCz residency assertion)
 - "Is this voter in the correct district?" (GeoZ region proof)
 
-### Phase 4 — AgenticDID Proxy Voting
+### Phase 4, AgenticDID Proxy Voting
 
 AI agents can vote on behalf of humans with:
 - Cryptographic delegation proof (human → agent)
 - Human's nullifier consumed (prevents both voting)
 - Scoped delegation (topic, time, choice constraints)
 
-### Phase 5 — ADL Legal Governance
+### Phase 5, ADL Legal Governance
 
 Case-bound voting for legal proceedings:
 - Settlement approval, discovery scope decisions, scheduling
@@ -190,15 +190,15 @@ The CLI auto-detects your role (creator vs voter) based on your wallet seed.
 
 ## Deployment Flow
 
-1. **Compile** — Generates ZK circuits in `contracts/managed/voting/`
-2. **Start proof server** — Required for generating ZK proofs (realDeal only)
-3. **Deploy** — Creates/restores wallet, funds via faucet, deploys contract
-4. **Interact** — Register voters, start proposals, vote, and close via CLI
+1. **Compile**, Generates ZK circuits in `contracts/managed/voting/`
+2. **Start proof server**, Required for generating ZK proofs (realDeal only)
+3. **Deploy**, Creates/restores wallet, funds via faucet, deploys contract
+4. **Interact**, Register voters, start proposals, vote, and close via CLI
 
 ## Wallet & Funding (RealDeal Mode)
 
 - Choose to create a new wallet or restore from a hex seed
-- New wallets generate a 64-character hex seed — **save it**
+- New wallets generate a 64-character hex seed, **save it**
 - Fund at: https://faucet.preprod.midnight.network/
 - DUST tokens are auto-registered from your tNight balance
 
@@ -245,13 +245,13 @@ MIT
 
 ---
 
-*EnterpriseZK Labs LLC — Built on Midnight. Powered by Cardano. Protected by zero-knowledge cryptography.*
+*EnterpriseZK Labs LLC, Built on Midnight. Powered by Cardano. Protected by zero-knowledge cryptography.*
 
 ---
 
 ## DIDz Ecosystem
 
-This project is part of the DIDz ecosystem — a suite of privacy-preserving
+This project is part of the DIDz ecosystem, a suite of privacy-preserving
 identity, credential, and application tools built on Midnight Network.
 
 ![DIDz Ecosystem Map](docs/DIDz-ecosystem-map.png)
